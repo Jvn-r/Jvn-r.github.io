@@ -47,7 +47,6 @@ body {
 
 .prompt {
     color: var(--accent);
-    font-weight: bold;
     white-space: nowrap;
 }
 
@@ -124,4 +123,8 @@ body {
     margin: 0;
     cursor: pointer;
     text-shadow: 0 0 6px currentColor;
+}
+
+#output a { 
+    color: var(--accent);
 }
