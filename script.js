@@ -119,6 +119,13 @@ const commands = {
             output.innerHTML = "";
         },
     },
+    meow: {
+        desc: "meow meooow",
+        run: (args) => {
+            const randomInt = Math.floor(Math.random() * 10);
+            print(`me${"o".repeat(randomInt)}w`);
+        }
+    }
 };
 
 for (const [name, cmd] of Object.entries(commands)) {
