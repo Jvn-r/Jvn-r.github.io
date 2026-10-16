@@ -1,0 +1,127 @@
+:root {
+    --bg: #0d0c1e;
+    --fg: #fff94b;
+    --dim: #375186;
+    --accent: #ff5555;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+.crt {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    height: 100vh;
+    gap: 20px;
+    position: relative;
+}
+
+#terminal {
+    border: 1px solid var(--dim);
+    background-color: var(--bg);
+    color: var(--fg);
+    padding: 16px;
+    overflow-y: auto;
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.02em;
+    font-size: 25px;
+    min-height: 0;
+    min-width: 0;
+    text-shadow: 0 0 4px currentColor
+}
+
+#help {
+    border: 1px solid var(--dim);
+    padding: 16px;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.prompt {
+    color: var(--accent);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#cmd {
+    flex: 1;
+    border: none;
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.03em;
+    font-size: 25px;
+    outline: none;
+    caret-color: var(--fg);
+    text-shadow: 0 0 4px currentColor;
+}
+
+.prompt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.crt::after {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;   
+    z-index: 10;
+    background:
+        repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 4px, rgba(0,0,0,.25) 8px),
+        radial-gradient(ellipse at center, transparent 65%, rgba(0,0,0,.5) 100%);
+}
+
+#help h3 {
+    color: var(--accent);
+    font-size: 22px;
+    margin-top: 0;
+    border-bottom: 1px solid var(--dim);
+    padding-bottom: 10px;
+    text-shadow: 0 0 4px currentColor;
+}
+
+#terminal,
+#help {
+    box-sizing: border-box;
+}
+
+@media (max-width: 800px) {
+    .crt {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(60vh, 1fr) auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #terminal {
+        min-height: 60vh;
+    }
+
+    #help {
+        min-height: 150px;
+    }
+}
+
+#output {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+#cmd-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    cursor: pointer;
+    text-shadow: 0 0 6px currentColor;
+}
