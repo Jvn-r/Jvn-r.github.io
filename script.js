@@ -39,7 +39,7 @@ function printBoot() {
         ["focus", "linux internals, C, AI, ML"],
         ["projects", `${Object.keys(projects).length} (run: projects)`],
         ["contact", "run: contact"],
-        ["ascii art from    ", "https://ascii.co.uk/art"]
+        ["art", "https://ascii.co.uk/art"]
     ];
 
     const title = document.createElement("div");
@@ -64,7 +64,7 @@ const projects = {
         title: "Serie",
         tagline: "a linux system observer and interpreter",
         stack: "C, Linux",
-        details: ["    Serie is a linux system analysis tool, that hooks onto the process connector via netlink and tracks all the process events to create a compact proc struct that stores important meta data.", "    This metadata is logged, using a temporal and a frequency based signal, in an ndJSon file for future analysis, plans for future machine learning integration for anomaly detection"],
+        details: ["    Serie is a linux system analysis tool, that hooks onto the process connector via netlink and tracks all the process events to create a compact proc struct that stores important meta data.", "    This metadata is logged, using a temporal and a frequency based signal, in an NDJSON file for future analysis, plans for future machine learning integration for anomaly detection"],
         link: "https://github.com/Jvn-r/serie",
     },
     chloe: {
@@ -92,21 +92,21 @@ const projects = {
         title: "Lecture Knowledge Retrieval System",
         tagline: "a multimodal RAG system to extract and query knowledge from a video",
         stack: "Python",
-        details: ["    LKRS is my final year project, where my team have found a research gap to work on, a multimodal RAG system, which uses audio and visual data, to perform RAG. ", "    The hardest part was syncing the audio transcript and the video keyframe OCR, which was solved by using timestamp windows and a deduplication threshold to ensure the retrieved chunk was optimal for accurate RAG."],
+        details: ["    LKRS is my final year project, where my team has found a research gap to work on, a multimodal RAG system, which uses audio and visual data, to perform RAG. ", "    The hardest part was syncing the audio transcript and the video keyframe OCR, which was solved by using timestamp windows and a deduplication threshold to ensure the retrieved chunk was optimal for accurate RAG."],
         link: "https://github.com/Jvn-r/lkrs",
     },
     phos: {
         title: "Phos",
         tagline: "experimental CV project for construction ppe detection",
         stack: "Python",
-        details: ["    Phos started off of a question, do i really need to use a DL model like YOLO for construction PPE detection, the main reason for the question was that PPE is very distinctive in wrt color, so why not use classical CV to perform color matching.", "    That is how i built a simple OpenCV only system that used HSV color matching and body part segmentation to check whether the worker had their PPE kit on."],
+        details: ["    Phos started off of a question, do i really need to use a DL model like YOLO for construction PPE detection, the main reason for the question was that PPE is very distinctive wrt color, so why not use classical CV to perform color matching.", "    That is how i built a simple OpenCV only system that used HSV color matching and body part segmentation to check whether the worker had their PPE kit on."],
         link: "https://github.com/Jvn-r/phos",
     },
     bible: {
         title: "Bible",
         tagline: "dynamic task scheduler, the `Meeting at 10pm` kinda tasks",
         stack: "Python, JS, CSS, HTML",
-        details: ["    Bible is a task scheduler, unlike regular calendar type schedulers, we use a scheduling algorithm to weigh the importance of a task and allocate our available free time on a timetable","    FastAPI is framework we use with Supabase as our database, along with an FFD(first fit decreasing) algorithm for the task scheduling"],
+        details: ["    Bible is a task scheduler, unlike regular calendar type schedulers, we use a scheduling algorithm to weigh the importance of a task and allocate our available free time on a timetable","    FastAPI is the framework we use with Supabase as our database, along with an FFD(first fit decreasing) algorithm for the task scheduling"],
         link: "https://github.com/Jvn-r/bible",
     }
 }
