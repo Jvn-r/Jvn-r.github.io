@@ -107,6 +107,10 @@ body {
         font-size: 14px;
     }
 
+    #cmd {
+        font-size: 14px;
+    }
+
     #help {
         min-height: 150px;
         font-size: 14px;
