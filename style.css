@@ -107,8 +107,16 @@ body {
         font-size: 14px;
     }
 
+    #body {
+        font-size: 14px;
+    }
+
     #cmd {
         font-size: 14px;
+    }
+
+    #help h3 {
+        font-size: 16px;
     }
 
     #help {
