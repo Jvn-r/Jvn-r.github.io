@@ -170,7 +170,7 @@ const commands = {
         }
     },
     neofetch: {
-        desc: "cool stuf",
+        desc: "more data",
         run: (args) => {
             printBoot();
         }

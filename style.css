@@ -136,7 +136,10 @@ body {
 .boot-key { color: var(--accent); }
 
 @media (max-width: 800px) {
-    .boot-art { display: none; }
+    #terminal pre {
+        padding-top: 10%;
+        font-size: 6px;
+        line-height: 1.3;
+    }
 }
-
 
