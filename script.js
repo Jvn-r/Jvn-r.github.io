@@ -3,6 +3,62 @@ const output = document.getElementById("output");
 const input = document.getElementById("cmd");
 const cmdList = document.getElementById("cmd-list");
 
+const ART = String.raw`
+                                ,.=,,==. ,,_
+                _ ,====, _    |I|   ||   |I  |
+               |      ^^ |   ||_,===TT ==,,_ |
+                |,==Y''Y==,,__| \L=_- '   +J/' 
+                \|=_  ' -=#J/..-|=_-     =|
+                |=_   -;-=' . .|=_-     =|----T--,
+                |=/\  -|=_-. . |=_-/^\  =||-|-|::|____
+                |=LJ  -|=_-. . |=_-|_| =||-|-|:::::::
+                |=_   -|=_-_.  |=_-     =|-|-||:::::::
+                |=_   -|=//^\. |=_-     =||-|-|:::::::
+            ,   |/&_,_-|=||  | |=_-     =|-|-||:::::::
+        ,--''8%,/    ',%||  | |=_-     =||-|-|%::::::
+    ,---'_,888'  ,.'''''\-.,|,|/!,--,.&\|&\-,|&#:::::
+    |;:;K\__,...;=\_____,=''           %%%&     %#,---
+    |;::::::::::::|       \'.________+-------\   ''
+    /8M%;:::;;:::::|                  |        '-------
+`;
+
+function printBoot() {
+    const boot = document.createElement("div");
+    boot.className = "boot";
+
+    const art = document.createElement("pre");
+    art.className = "boot-art";
+    art.textContent = ART.trim() ? ART.replace(/^\n|\n$/g, "") : "";
+
+    const info = document.createElement("div");
+    const rows = [
+        ["os", "jvnr-os (it's a website)"],
+        ["name", "R Jeevan"],
+        ["role", "AIML undergrad, DSATM"],
+        ["grad", "2027"],
+        ["focus", "linux internals, C, AI, ML"],
+        ["projects", `${Object.keys(projects).length} (run: projects)`],
+        ["contact", "run: contact"],
+        ["ascii art from    ", "https://ascii.co.uk/art"]
+    ];
+
+    const title = document.createElement("div");
+    title.textContent = "visitor@jvnr";
+    info.append(title, "-------------");
+    for (const [k, v] of rows) {
+        const row = document.createElement("div");
+        const key = document.createElement("span");
+        key.className = "boot-key";
+        key.textContent = k.padEnd(10);
+        row.append(key, v);
+        info.append(row);
+    }
+
+    boot.append(art, info);
+    output.appendChild(boot);
+    terminal.scrollTop = terminal.scrollHeight;
+}
+
 const projects = {
     serie: {
         title: "Serie",
@@ -78,13 +134,13 @@ const commands = {
             print("     Halloo, I'm R Jeevan, an AIML undergrad.");
             print("     My interests lie in understanding how things work beneath the surface.");
             print("     My major project called Serie does exactly that, written completely in C, it acts as a monitoring tool for linux internals helping me get a closer look at actual process interactions and behaviours.");
-            print("     Another project called Phaea does a similar job for Windows, focusing on visualization. Theres another project called Chloe where I... well i think im losing the track of an `about` command, so I'll stop there with the rambling, you can check out more of my projects by using the `projects` command.");
-            print("     That aside my hobbies include playing games, reading, watching movies, sleeping etc, just normal human stuff... and drawing, but i am horrible at it, you can see my drawings using the `drawings` command.");
+            print("     Another project called Phaea does a similar job for Windows, focusing on visualization. Theres another project called Chloe where I... well i think im losing the track of an `about`, you can check out more of my projects by using the `projects` command.");
+            print("     That aside my hobbies include playing games, reading, watching movies, sleeping etc, just normal human stuff... and drawing, but i am horrible at it");
             print("     Oki thats already a lot of text, and i dont think anyone has actually read it, BUT its the thought that counts, so Thank you for reading me yap and try out any command thats listed under the `help` command");
         },   
     },
     projects: {
-        desc: "list of a few of my projects",
+        desc: "browse projects",
         run: (args) => {
             if(args.length === 0) {
                 print("to get details on any of the below mentioned projects please run: `projects <project_name>`, Ex: projects serie");
@@ -111,6 +167,12 @@ const commands = {
         desc: "my art (it's bad)",
         run: (args) => {
             print("SIKE, ive not implemented it yet");
+        }
+    },
+    neofetch: {
+        desc: "cool stuf",
+        run: (args) => {
+            printBoot();
         }
     },
     clear: {
@@ -202,3 +264,5 @@ terminal.addEventListener("click", () => {
         input.focus();
     }
 });
+
+runCommand("neofetch");

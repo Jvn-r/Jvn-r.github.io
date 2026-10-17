@@ -104,10 +104,12 @@ body {
 
     #terminal {
         min-height: 60vh;
+        font-size: 14px;
     }
 
     #help {
         min-height: 150px;
+        font-size: 14px;
     }
 }
 
@@ -128,3 +130,13 @@ body {
 #output a { 
     color: var(--accent);
 }
+
+.boot { display: flex; gap: 30px; align-items: flex-start; margin-bottom: 12px; }
+.boot-art { margin: 0; white-space: pre; color: var(--accent); line-height: 1.2; flex-shrink: 0; }
+.boot-key { color: var(--accent); }
+
+@media (max-width: 800px) {
+    .boot-art { display: none; }
+}
+
+
