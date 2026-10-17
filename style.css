@@ -111,6 +111,17 @@ body {
         min-height: 150px;
         font-size: 14px;
     }
+    #terminal pre {
+        font-size: 6px;
+        line-height: 1.3;
+    }
+    .boot {
+        flex-direction: column;
+        gap: 12px;
+    }
+    .boot-art {
+        margin: 0 auto;
+    }
 }
 
 #output {
@@ -134,12 +145,3 @@ body {
 .boot { display: flex; gap: 30px; align-items: flex-start; margin-bottom: 12px; }
 .boot-art { margin: 0; white-space: pre; color: var(--accent); line-height: 1.2; flex-shrink: 0; }
 .boot-key { color: var(--accent); }
-
-@media (max-width: 800px) {
-    #terminal pre {
-        padding-top: 10%;
-        font-size: 6px;
-        line-height: 1.3;
-    }
-}
-

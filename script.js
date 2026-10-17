@@ -113,7 +113,7 @@ const projects = {
 
 const commands = {
     help: {
-        desc: "list available commands",
+        desc: "available commands",
         run: (args) => {
             for (const [name, cmd] of Object.entries(commands)) {
                 print(`${name}: ${cmd.desc}`);
