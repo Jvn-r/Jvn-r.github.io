@@ -23,9 +23,9 @@ by me
 
 ---
 ### future work
-command memory
-tab autocomplete
-+ more
+- command memory
+- tab autocomplete
+maybe more
 
 ---
 ### meow
