@@ -158,15 +158,21 @@ const commands = {
                     print(`${proj.details[1]}`);
                     printLink("github link:", `${proj.link}`, `${proj.link}`);
                 }else {
-                    print("Please re check the project name");
+                    print("Could be a Minor Spelling Mistake");
                 }
             }
+        }
+    },
+    whoami: {
+        desc: "who am i",
+        run: (args) => {
+            print("R Jeevan (^o^)/");
         }
     },
     drawings: {
         desc: "my art (it's bad)",
         run: (args) => {
-            print("SIKE, ive not implemented it yet");
+            print("SIKE, ive not implemented it yet  ┐('～`；)┌");
         }
     },
     neofetch: {

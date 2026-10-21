@@ -1,6 +1,8 @@
 # Jvn-r.github.io
 Repo for my personal website, check it out at [jvnr.me](https://jvnr.me)
 
+![alt text](ss.png)
+
 ---
 ### stack
 plain html, css, js 
