@@ -62,7 +62,7 @@ kubectl get nodes
 </code></pre>
 <p><em>Expected:</em> the control plane and CoreDNS URLs, and a node named <code>minikube</code> with status <code>Ready</code>.</p>
 <h3>Step 5 — Create the Pod manifest <code>pod.yaml</code></h3>
-<pre><code class="language-bash">cat &gt; pod.yaml &lt;&lt;'EOF'
+<pre><code class="language-bash">pod.yaml ---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -75,7 +75,7 @@ spec:
     image: nginx:latest
     ports:
     - containerPort: 80
-EOF
+
 </code></pre>
 <p>The four top-level fields to remember: <code>apiVersion</code> (v1 for a Pod), <code>kind</code> (Pod), <code>metadata</code> (name and labels), <code>spec</code> (the list of containers).</p>
 <h3>Step 6 — Create the Pod</h3>

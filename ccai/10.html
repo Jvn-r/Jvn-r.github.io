@@ -56,7 +56,7 @@ kubectl get nodes
 <h3>Step 4 — Create the app (it reads its message from an environment variable)</h3>
 <pre><code class="language-bash">mkdir -p ~/oe2 &amp;&amp; cd ~/oe2
 
-cat &gt; app.py &lt;&lt;'EOF'
+app.py ---
 import os
 from flask import Flask
 
@@ -76,11 +76,11 @@ def health():
 if __name__ == &quot;__main__&quot;:
     print(f&quot;Starting app {VERSION} with message: {APP_MESSAGE}&quot;, flush=True)
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
 
-echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+requirements.txt ---
+Flask==3.1.0 
 
-cat &gt; Dockerfile &lt;&lt;'EOF'
+Dockerfile ---
 FROM python:3.12-slim
 WORKDIR /app
 RUN apt-get update &amp;&amp; \
@@ -91,14 +91,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD [&quot;python&quot;, &quot;app.py&quot;]
-EOF
+
 </code></pre>
 <h3>Step 5 — Build <code>myapp:v1</code> and load it into Minikube</h3>
 <pre><code class="language-bash">docker build -t myapp:v1 .
 minikube image load myapp:v1
 </code></pre>
 <h3>Step 6 — Create the ConfigMap</h3>
-<pre><code class="language-bash">cat &gt; configmap.yaml &lt;&lt;'EOF'
+<pre><code class="language-bash">configmap.yaml ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -106,13 +106,12 @@ metadata:
 data:
   APP_MESSAGE: &quot;Hello from ConfigMap&quot;
   APP_ENV: &quot;lab&quot;
-EOF
 
 kubectl apply -f configmap.yaml
 kubectl get configmap myapp-config
 </code></pre>
 <h3>Step 7 — Create a Deployment that loads the ConfigMap as environment variables</h3>
-<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;'EOF'
+<pre><code class="language-bash">deployment.yaml ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -135,7 +134,7 @@ spec:
         envFrom:
         - configMapRef:
             name: myapp-config
-EOF
+
 
 kubectl apply -f deployment.yaml
 kubectl rollout status deployment/myapp-deployment

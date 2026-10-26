@@ -58,7 +58,7 @@ kubectl get nodes
 <h3>Step 4 — Create the Lab 2 app files</h3>
 <pre><code class="language-bash">mkdir -p ~/lab8 &amp;&amp; cd ~/lab8
 
-cat &gt; app.py &lt;&lt;'EOF'
+app.py ---
 from flask import Flask
 
 app = Flask(__name__)
@@ -73,11 +73,11 @@ def health():
 
 if __name__ == &quot;__main__&quot;:
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
 
-echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+requirements.txt ---
+Flask==3.1.0
 
-cat &gt; Dockerfile &lt;&lt;'EOF'
+Dockerfile ---
 FROM python:3.12-slim
 WORKDIR /app
 RUN apt-get update &amp;&amp; \
@@ -88,7 +88,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD [&quot;python&quot;, &quot;app.py&quot;]
-EOF
+
 </code></pre>
 <h3>Step 5 — Build <code>myapp:v1</code> locally</h3>
 <pre><code class="language-bash">docker build -t myapp:v1 .
@@ -100,7 +100,7 @@ minikube image ls | grep myapp
 </code></pre>
 <p>The Minikube cluster has its own image store, separate from your host Docker. Without this step the Pods can't find <code>myapp:v1</code>.</p>
 <h3>Step 7 — Create <code>deployment.yaml</code></h3>
-<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;'EOF'
+<pre><code class="language-bash">deployment.yaml ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -121,7 +121,7 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
-EOF
+
 </code></pre>
 <p><code>selector.matchLabels</code> must match <code>template.metadata.labels</code>; that is how the Deployment finds its Pods. <code>imagePullPolicy: Never</code> tells Kubernetes to use the image already loaded in Minikube and never pull from a registry.</p>
 <h3>Step 8 — Apply the Deployment</h3>

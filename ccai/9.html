@@ -56,7 +56,7 @@ kubectl get nodes
 <h3>Step 4 — Create the app, build the image and load it into Minikube</h3>
 <pre><code class="language-bash">mkdir -p ~/oe1 &amp;&amp; cd ~/oe1
 
-cat &gt; app.py &lt;&lt;'EOF'
+app.py ---
 from flask import Flask
 
 app = Flask(__name__)
@@ -71,11 +71,11 @@ def health():
 
 if __name__ == &quot;__main__&quot;:
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
 
-echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+requirements.txt ---
+Flask==3.1.0
 
-cat &gt; Dockerfile &lt;&lt;'EOF'
+Dockerfile ---
 FROM python:3.12-slim
 WORKDIR /app
 RUN apt-get update &amp;&amp; \
@@ -86,13 +86,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD [&quot;python&quot;, &quot;app.py&quot;]
-EOF
 
 docker build -t myapp:v1 .
 minikube image load myapp:v1
 </code></pre>
 <h3>Step 5 — Create and apply the Lab 8 Deployment</h3>
-<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;'EOF'
+<pre><code class="language-bash">deployment.yaml ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -113,14 +112,14 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
-EOF
+
 
 kubectl apply -f deployment.yaml
 kubectl get pods
 </code></pre>
 <p><em>Expected:</em> two Pods, <code>Running</code> within a few seconds.</p>
 <h3>Step 6 — Create the Service manifest <code>service.yaml</code></h3>
-<pre><code class="language-bash">cat &gt; service.yaml &lt;&lt;'EOF'
+<pre><code class="language-bash">service.yaml ---
 apiVersion: v1
 kind: Service
 metadata:
@@ -132,7 +131,7 @@ spec:
   ports:
   - port: 5000
     targetPort: 5000
-EOF
+
 </code></pre>
 <p><code>selector</code> must match the Pod label <code>app: myapp</code> from the Deployment. <code>port</code> is the Service's own port, <code>targetPort</code> is the container port. With no <code>nodePort</code> given, Kubernetes assigns one from 30000 to 32767.</p>
 <h3>Step 7 — Apply the Service and inspect the assigned NodePort</h3>

@@ -39,7 +39,7 @@ docker --version
 </code></pre>
 <h3>Step 1 — Create the project folder and <code>app.py</code></h3>
 <pre><code class="language-bash">mkdir -p ~/lab2 &amp;&amp; cd ~/lab2
-cat &gt; app.py &lt;&lt;'EOF'
+app.py
 from flask import Flask
 
 app = Flask(__name__)
@@ -54,13 +54,12 @@ def health():
 
 if __name__ == &quot;__main__&quot;:
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
 </code></pre>
 <h3>Step 2 — Create <code>requirements.txt</code></h3>
 <pre><code class="language-bash">echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
 </code></pre>
 <h3>Step 3 — Create the <code>Dockerfile</code> (no extension)</h3>
-<pre><code class="language-bash">cat &gt; Dockerfile &lt;&lt;'EOF'
+<pre><code class="language-bash">Dockerfile 
 FROM python:3.12-slim
 WORKDIR /app
 RUN apt-get update &amp;&amp; \
@@ -71,7 +70,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD [&quot;python&quot;, &quot;app.py&quot;]
-EOF
 </code></pre>
 <p>The <code>apt-get</code> line installs bash, procps and curl so that Lab 3 can open a shell and run <code>ps aux</code> inside the container.</p>
 <h3>Step 4 — Build the image</h3>

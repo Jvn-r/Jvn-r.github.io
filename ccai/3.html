@@ -40,7 +40,7 @@ docker --version
 <h3>Step 1 — Create the Lab 2 app files</h3>
 <pre><code class="language-bash">mkdir -p ~/lab3 &amp;&amp; cd ~/lab3
 
-cat &gt; app.py &lt;&lt;'EOF'
+app.py ---
 from flask import Flask
 
 app = Flask(__name__)
@@ -55,11 +55,11 @@ def health():
 
 if __name__ == &quot;__main__&quot;:
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
 
-echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+requirements.txt ---
+Flask==3.1.0
 
-cat &gt; Dockerfile &lt;&lt;'EOF'
+Dockerfile ---
 FROM python:3.12-slim
 WORKDIR /app
 RUN apt-get update &amp;&amp; \
@@ -70,7 +70,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD [&quot;python&quot;, &quot;app.py&quot;]
-EOF
+
 </code></pre>
 <h3>Step 2 — Build and run the Lab 2 container</h3>
 <pre><code class="language-bash">docker build -t myapp:v1 .
@@ -103,7 +103,7 @@ exit
 <p><em>Expected:</em> <code>/app</code>, then <code>Dockerfile  app.py  requirements.txt</code>, then a process list that includes <code>python app.py</code>.</p>
 <h3>Step 7 — Change <code>app.py</code> to require an environment variable</h3>
 <p>Back on the host, in <code>~/lab3</code>:</p>
-<pre><code class="language-bash">cat &gt; app.py &lt;&lt;'EOF'
+<pre><code class="language-bash">app.py ---
 import os
 from flask import Flask
 
@@ -117,7 +117,7 @@ def home():
 
 if __name__ == &quot;__main__&quot;:
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
+
 </code></pre>
 <p><code>os.environ[&quot;APP_MESSAGE&quot;]</code> raises a <code>KeyError</code> when the variable is not set. That is the deliberate failure.</p>
 <h3>Step 8 — Build the deliberately broken image</h3>

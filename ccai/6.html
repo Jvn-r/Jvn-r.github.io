@@ -43,7 +43,7 @@ docker compose version
 <p>The web service builds from a Dockerfile (<code>build: .</code>), so this folder needs the Lab 2 <code>Dockerfile</code> and <code>requirements.txt</code> plus a simple <code>app.py</code>.</p>
 <pre><code class="language-bash">mkdir -p ~/myapp-compose &amp;&amp; cd ~/myapp-compose
 
-cat &gt; app.py &lt;&lt;'EOF'
+app.py --- 
 from flask import Flask
 
 app = Flask(__name__)
@@ -54,11 +54,11 @@ def home():
 
 if __name__ == &quot;__main__&quot;:
     app.run(host=&quot;0.0.0.0&quot;, port=5000)
-EOF
 
-echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+requirements.txt ---
+Flask==3.1.0
 
-cat &gt; Dockerfile &lt;&lt;'EOF'
+Dockerfile ---
 FROM python:3.12-slim
 WORKDIR /app
 RUN apt-get update &amp;&amp; \
@@ -69,10 +69,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 5000
 CMD [&quot;python&quot;, &quot;app.py&quot;]
-EOF
+
 </code></pre>
 <h3>Step 2 — Create <code>docker-compose.yml</code></h3>
-<pre><code class="language-bash">cat &gt; docker-compose.yml &lt;&lt;'EOF'
+<pre><code class="language-bash">docker-compose.yml ---
 services:
   web:
     build: .
@@ -92,7 +92,7 @@ services:
 
 volumes:
   compose_db_data:
-EOF
+
 </code></pre>
 <p><code>depends_on</code> makes Compose start <code>database</code> before <code>web</code>. It waits for the container to start, not for Postgres to be ready. <code>compose_db_data</code> is a named volume that keeps the database files.</p>
 <h3>Step 3 — Start the stack</h3>
