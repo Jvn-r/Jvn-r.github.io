@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lab 7 — Kubernetes Pods with Minikube — CCAI lab reference">
+<title>Lab 7 — Kubernetes Pods with Minikube | CCAI Labs</title>
+<style>
+:root{color-scheme:dark;--bg:#080a12;--panel:#101522;--text:#e3e9f5;--muted:#a0aec4;--accent:#8ecbff;--border:#29354a;--code:#070b12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(100% - 2rem,1000px);margin:0 auto;padding:2rem 0 4rem}
+header{padding:1.5rem;margin-bottom:1.5rem;background:#101522;border:1px solid var(--border);border-radius:12px}
+.eyebrow{color:var(--accent);font:700 .8rem ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+h1,h2,h3{line-height:1.25}h1{font-size:clamp(1.8rem,4vw,2.5rem);margin:.5rem 0}h2{margin-top:2rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}h3{color:var(--accent);margin-top:1.5rem}
+p,li{max-width:85ch}a{color:var(--accent)}strong{color:#fff}
+pre{overflow-x:auto;padding:1rem;background:var(--code);border:1px solid var(--border);border-radius:8px;line-height:1.5;tab-size:2}
+pre code{white-space:pre;font: .9rem ui-monospace,SFMono-Regular,Consolas,monospace}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#1a2435;padding:.1rem .3rem;border-radius:4px}
+pre code{background:transparent;padding:0}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}th,td{border:1px solid var(--border);padding:.65rem;text-align:left;vertical-align:top}th{background:var(--panel)}
+blockquote{border-left:3px solid var(--accent);padding:.5rem 1rem;margin-left:0;color:var(--muted);background:var(--panel)}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 2rem}nav a{border:1px solid var(--border);padding:.35rem .6rem;border-radius:6px;text-decoration:none}
+footer{border-top:1px solid var(--border);margin-top:3rem;padding-top:1rem;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){main{width:min(100% - 1.2rem,1000px);padding-top:.5rem}header{padding:1rem}body{font-size:15px}pre{padding:.75rem}pre code{font-size:.8rem}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">CCAI · Lab Reference · 07</div><h1>Lab 7 — Kubernetes Pods with Minikube</h1><p>Terminal-friendly lab notes for w3m.</p></header>
+<nav><a href="index.html">Lab index</a><a href="1.html">Lab 1</a><a href="2.html">Lab 2</a><a href="3.html">Lab 3</a><a href="4.html">Lab 4</a><a href="5.html">Lab 5</a><a href="6.html">Lab 6</a><a href="7.html">Lab 7</a><a href="8.html">Lab 8</a><a href="9.html">Lab 9</a><a href="10.html">Lab 10</a></nav>
+<p>Goal: start a local Kubernetes cluster with Minikube, create an nginx Pod from a YAML manifest, inspect it, then delete it and see that nothing recreates it.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<p>Minikube runs the cluster inside a Docker container (the <code>docker</code> driver), so Docker comes first.</p>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version
+</code></pre>
+<h3>Step 1 — Install kubectl</h3>
+<pre><code class="language-bash">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
+kubectl version --client
+</code></pre>
+<h3>Step 2 — Install Minikube</h3>
+<pre><code class="language-bash">curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+rm minikube-linux-amd64
+minikube version
+</code></pre>
+<p>These are the x86-64 builds, which fit the lab PCs. On an ARM machine, replace <code>amd64</code> with <code>arm64</code> in both steps.</p>
+<h3>Step 3 — Start the cluster</h3>
+<pre><code class="language-bash">minikube start --driver=docker
+</code></pre>
+<p>Run it as your normal user, not with <code>sudo</code>; Minikube refuses the Docker driver as root. The first start downloads images and takes a few minutes.</p>
+<p><em>Expected:</em> the output ends with <code>Done! kubectl is now configured to use &quot;minikube&quot; cluster</code>.</p>
+<h3>Step 4 — Verify cluster health</h3>
+<pre><code class="language-bash">kubectl cluster-info
+kubectl get nodes
+</code></pre>
+<p><em>Expected:</em> the control plane and CoreDNS URLs, and a node named <code>minikube</code> with status <code>Ready</code>.</p>
+<h3>Step 5 — Create the Pod manifest <code>pod.yaml</code></h3>
+<pre><code class="language-bash">cat &gt; pod.yaml &lt;&lt;'EOF'
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+EOF
+</code></pre>
+<p>The four top-level fields to remember: <code>apiVersion</code> (v1 for a Pod), <code>kind</code> (Pod), <code>metadata</code> (name and labels), <code>spec</code> (the list of containers).</p>
+<h3>Step 6 — Create the Pod</h3>
+<pre><code class="language-bash">kubectl apply -f pod.yaml
+</code></pre>
+<h3>Step 7 — Verify the Pod reaches Running</h3>
+<pre><code class="language-bash">kubectl get pods
+kubectl get pods -w
+</code></pre>
+<p><em>Expected:</em> <code>nginx-pod</code> goes from <code>ContainerCreating</code> to <code>Running</code> with READY <code>1/1</code>. Press Ctrl+C to leave watch mode.</p>
+<h3>Step 8 — Inspect the Pod and read its Events</h3>
+<pre><code class="language-bash">kubectl describe pod nginx-pod
+</code></pre>
+<p><em>Expected:</em> the Events section at the bottom shows Scheduled, Pulling, Pulled, Created and Started.</p>
+<h3>Step 9 — Delete the Pod</h3>
+<pre><code class="language-bash">kubectl delete pod nginx-pod
+kubectl get pods
+</code></pre>
+<p><em>Expected:</em> <code>No resources found in default namespace.</code> A bare Pod has no controller managing it, so nothing recreates it. A Deployment (Lab 8) does.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">minikube stop
+</code></pre>
+<p><code>minikube delete</code> removes the cluster completely.</p>
+
+<footer>CCAI lab reference · <a href="index.html">All labs</a></footer>
+</main></body></html>

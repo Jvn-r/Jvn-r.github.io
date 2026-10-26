@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lab 5 — Docker networking with a custom bridge network — CCAI lab reference">
+<title>Lab 5 — Docker networking with a custom bridge network | CCAI Labs</title>
+<style>
+:root{color-scheme:dark;--bg:#080a12;--panel:#101522;--text:#e3e9f5;--muted:#a0aec4;--accent:#8ecbff;--border:#29354a;--code:#070b12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(100% - 2rem,1000px);margin:0 auto;padding:2rem 0 4rem}
+header{padding:1.5rem;margin-bottom:1.5rem;background:#101522;border:1px solid var(--border);border-radius:12px}
+.eyebrow{color:var(--accent);font:700 .8rem ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+h1,h2,h3{line-height:1.25}h1{font-size:clamp(1.8rem,4vw,2.5rem);margin:.5rem 0}h2{margin-top:2rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}h3{color:var(--accent);margin-top:1.5rem}
+p,li{max-width:85ch}a{color:var(--accent)}strong{color:#fff}
+pre{overflow-x:auto;padding:1rem;background:var(--code);border:1px solid var(--border);border-radius:8px;line-height:1.5;tab-size:2}
+pre code{white-space:pre;font: .9rem ui-monospace,SFMono-Regular,Consolas,monospace}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#1a2435;padding:.1rem .3rem;border-radius:4px}
+pre code{background:transparent;padding:0}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}th,td{border:1px solid var(--border);padding:.65rem;text-align:left;vertical-align:top}th{background:var(--panel)}
+blockquote{border-left:3px solid var(--accent);padding:.5rem 1rem;margin-left:0;color:var(--muted);background:var(--panel)}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 2rem}nav a{border:1px solid var(--border);padding:.35rem .6rem;border-radius:6px;text-decoration:none}
+footer{border-top:1px solid var(--border);margin-top:3rem;padding-top:1rem;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){main{width:min(100% - 1.2rem,1000px);padding-top:.5rem}header{padding:1rem}body{font-size:15px}pre{padding:.75rem}pre code{font-size:.8rem}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">CCAI · Lab Reference · 05</div><h1>Lab 5 — Docker networking with a custom bridge network</h1><p>Terminal-friendly lab notes for w3m.</p></header>
+<nav><a href="index.html">Lab index</a><a href="1.html">Lab 1</a><a href="2.html">Lab 2</a><a href="3.html">Lab 3</a><a href="4.html">Lab 4</a><a href="5.html">Lab 5</a><a href="6.html">Lab 6</a><a href="7.html">Lab 7</a><a href="8.html">Lab 8</a><a href="9.html">Lab 9</a><a href="10.html">Lab 10</a></nav>
+<p>Goal: show that containers on a custom bridge network reach each other by name, and that a container on the default bridge cannot reach them.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version
+</code></pre>
+<h3>Step 1 — Create the custom bridge network</h3>
+<pre><code class="language-bash">docker network create lab-network
+docker network ls
+</code></pre>
+<p><em>Expected:</em> <code>lab-network</code> appears with driver <code>bridge</code> next to the default <code>bridge</code>, <code>host</code> and <code>none</code>.</p>
+<h3>Step 2 — Run an nginx web container on the custom network</h3>
+<pre><code class="language-bash">docker run -d --name web --network lab-network nginx
+</code></pre>
+<h3>Step 3 — Run an Alpine client container on the same network</h3>
+<pre><code class="language-bash">docker run -dit --name client --network lab-network alpine
+</code></pre>
+<p><code>-dit</code> (detached, interactive, with a terminal) keeps Alpine running in the background. Without it Alpine would exit at once.</p>
+<h3>Step 4 — From the client, reach nginx by container name</h3>
+<pre><code class="language-bash">docker exec -it client sh
+</code></pre>
+<p>Inside the container:</p>
+<pre><code class="language-sh">ping -c 3 web
+wget -qO- http://web
+exit
+</code></pre>
+<p><em>Expected:</em> <code>web</code> resolves to an IP address and replies, and <code>wget</code> prints the nginx welcome page HTML. Docker's built-in DNS resolves container names on user-defined networks.</p>
+<p>Optional: <code>docker network inspect lab-network</code> lists both containers.</p>
+<h3>Step 5 — Run a third container on the default bridge network</h3>
+<pre><code class="language-bash">docker run -dit --name outsider alpine
+</code></pre>
+<h3>Step 6 — Try to reach the custom-network container from the outsider</h3>
+<pre><code class="language-bash">docker exec -it outsider sh
+</code></pre>
+<p>Inside the container:</p>
+<pre><code class="language-sh">ping -c 3 web
+wget -qO- http://web
+exit
+</code></pre>
+<p><em>Expected:</em> <code>ping: bad address 'web'</code> and <code>wget: bad address 'web'</code>. The outsider is not on <code>lab-network</code>, and the default bridge has no name resolution. Reaching <code>web</code> by IP address fails too, because Docker isolates the two networks.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker rm -f web client outsider
+docker network rm lab-network
+</code></pre>
+
+<footer>CCAI lab reference · <a href="index.html">All labs</a></footer>
+</main></body></html>

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Open-ended 2 — ConfigMap, rolling updates and debugging — CCAI lab reference">
+<title>Open-ended 2 — ConfigMap, rolling updates and debugging | CCAI Labs</title>
+<style>
+:root{color-scheme:dark;--bg:#080a12;--panel:#101522;--text:#e3e9f5;--muted:#a0aec4;--accent:#8ecbff;--border:#29354a;--code:#070b12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(100% - 2rem,1000px);margin:0 auto;padding:2rem 0 4rem}
+header{padding:1.5rem;margin-bottom:1.5rem;background:#101522;border:1px solid var(--border);border-radius:12px}
+.eyebrow{color:var(--accent);font:700 .8rem ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+h1,h2,h3{line-height:1.25}h1{font-size:clamp(1.8rem,4vw,2.5rem);margin:.5rem 0}h2{margin-top:2rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}h3{color:var(--accent);margin-top:1.5rem}
+p,li{max-width:85ch}a{color:var(--accent)}strong{color:#fff}
+pre{overflow-x:auto;padding:1rem;background:var(--code);border:1px solid var(--border);border-radius:8px;line-height:1.5;tab-size:2}
+pre code{white-space:pre;font: .9rem ui-monospace,SFMono-Regular,Consolas,monospace}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#1a2435;padding:.1rem .3rem;border-radius:4px}
+pre code{background:transparent;padding:0}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}th,td{border:1px solid var(--border);padding:.65rem;text-align:left;vertical-align:top}th{background:var(--panel)}
+blockquote{border-left:3px solid var(--accent);padding:.5rem 1rem;margin-left:0;color:var(--muted);background:var(--panel)}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 2rem}nav a{border:1px solid var(--border);padding:.35rem .6rem;border-radius:6px;text-decoration:none}
+footer{border-top:1px solid var(--border);margin-top:3rem;padding-top:1rem;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){main{width:min(100% - 1.2rem,1000px);padding-top:.5rem}header{padding:1rem}body{font-size:15px}pre{padding:.75rem}pre code{font-size:.8rem}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">CCAI · Lab Reference · 10</div><h1>Open-ended 2 — ConfigMap, rolling updates and debugging</h1><p>Terminal-friendly lab notes for w3m.</p></header>
+<nav><a href="index.html">Lab index</a><a href="1.html">Lab 1</a><a href="2.html">Lab 2</a><a href="3.html">Lab 3</a><a href="4.html">Lab 4</a><a href="5.html">Lab 5</a><a href="6.html">Lab 6</a><a href="7.html">Lab 7</a><a href="8.html">Lab 8</a><a href="9.html">Lab 9</a><a href="10.html">Lab 10</a></nav>
+<p>Goal: feed configuration to a Deployment from a ConfigMap, roll out a new image version, break the rollout with a bad image tag, diagnose <code>ImagePullBackOff</code>, roll back, then check the ConfigMap values, logs and events. This builds on Lab 8, so the app, image and Deployment are recreated here.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version
+</code></pre>
+<h3>Step 1 — Install kubectl</h3>
+<pre><code class="language-bash">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
+kubectl version --client
+</code></pre>
+<h3>Step 2 — Install Minikube</h3>
+<pre><code class="language-bash">curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+rm minikube-linux-amd64
+minikube version
+</code></pre>
+<h3>Step 3 — Start the cluster</h3>
+<pre><code class="language-bash">minikube start --driver=docker
+kubectl get nodes
+</code></pre>
+<h3>Step 4 — Create the app (it reads its message from an environment variable)</h3>
+<pre><code class="language-bash">mkdir -p ~/oe2 &amp;&amp; cd ~/oe2
+
+cat &gt; app.py &lt;&lt;'EOF'
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+APP_MESSAGE = os.environ.get(&quot;APP_MESSAGE&quot;, &quot;no message set&quot;)
+VERSION = &quot;v1&quot;
+
+@app.route(&quot;/&quot;)
+def home():
+    return f&quot;{APP_MESSAGE} | version: {VERSION}&quot;
+
+@app.route(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;healthy&quot;}
+
+if __name__ == &quot;__main__&quot;:
+    print(f&quot;Starting app {VERSION} with message: {APP_MESSAGE}&quot;, flush=True)
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF
+
+echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+
+cat &gt; Dockerfile &lt;&lt;'EOF'
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF
+</code></pre>
+<h3>Step 5 — Build <code>myapp:v1</code> and load it into Minikube</h3>
+<pre><code class="language-bash">docker build -t myapp:v1 .
+minikube image load myapp:v1
+</code></pre>
+<h3>Step 6 — Create the ConfigMap</h3>
+<pre><code class="language-bash">cat &gt; configmap.yaml &lt;&lt;'EOF'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  APP_MESSAGE: &quot;Hello from ConfigMap&quot;
+  APP_ENV: &quot;lab&quot;
+EOF
+
+kubectl apply -f configmap.yaml
+kubectl get configmap myapp-config
+</code></pre>
+<h3>Step 7 — Create a Deployment that loads the ConfigMap as environment variables</h3>
+<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;'EOF'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:v1
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: myapp-config
+EOF
+
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp-deployment
+kubectl get pods
+</code></pre>
+<p><code>envFrom.configMapRef</code> turns every key in the ConfigMap into an environment variable in the container.</p>
+<p>This file leaves out <code>imagePullPolicy: Never</code> on purpose. A tag other than <code>latest</code> defaults to <code>IfNotPresent</code>, so the image you loaded is used. A tag that doesn't exist then makes Kubernetes try Docker Hub and fail with <code>ImagePullBackOff</code>, which is the error Step 9 needs. With <code>Never</code> you would see <code>ErrImageNeverPull</code> instead.</p>
+<h3>Step 8 — Rolling update to a new image version</h3>
+<pre><code class="language-bash">sed -i 's/VERSION = &quot;v1&quot;/VERSION = &quot;v2&quot;/' app.py
+docker build -t myapp:v2 .
+minikube image load myapp:v2
+
+sed -i 's/image: myapp:v1/image: myapp:v2/' deployment.yaml
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp-deployment
+kubectl get pods
+kubectl rollout history deployment/myapp-deployment
+</code></pre>
+<p><em>Expected:</em> <code>rollout status</code> reports the old replicas being replaced and ends with <code>successfully rolled out</code>. The Pods have new names and young ages, and the history lists revisions 1 and 2.</p>
+<h3>Step 9 — Break it with a bad image tag</h3>
+<pre><code class="language-bash">sed -i 's/image: myapp:v2/image: myapp:v99/' deployment.yaml
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp-deployment --timeout=30s
+kubectl get pods
+</code></pre>
+<p><em>Expected:</em> <code>rollout status</code> keeps waiting and then times out, which is the stall. <code>get pods</code> shows two old Pods still <code>Running</code> and one new Pod in <code>ErrImagePull</code> or <code>ImagePullBackOff</code>. The old Pods stay up because a rolling update won't remove them until a new Pod is ready.</p>
+<h3>Step 10 — Diagnose the failure</h3>
+<pre><code class="language-bash">BAD_POD=$(kubectl get pods --no-headers | awk '$3!=&quot;Running&quot;{print $1; exit}')
+kubectl describe pod $BAD_POD
+</code></pre>
+<p><em>Expected:</em> the Events section shows <code>Failed to pull image &quot;myapp:v99&quot;</code>, <code>ErrImagePull</code>, <code>Back-off pulling image</code> and <code>ImagePullBackOff</code>. The cause is that tag <code>v99</code> doesn't exist.</p>
+<h3>Step 11 — Roll back to the previous working version</h3>
+<pre><code class="language-bash">kubectl rollout undo deployment/myapp-deployment
+kubectl rollout status deployment/myapp-deployment
+kubectl get pods
+kubectl get deployment myapp-deployment -o jsonpath='{.spec.template.spec.containers[0].image}' &amp;&amp; echo
+</code></pre>
+<p><em>Expected:</em> <code>successfully rolled out</code>, all Pods <code>Running</code>, and the image prints as <code>myapp:v2</code>. To keep the file in step with the cluster: <code>sed -i 's/image: myapp:v99/image: myapp:v2/' deployment.yaml</code>.</p>
+<h3>Step 12 — Check the ConfigMap values inside a Pod</h3>
+<pre><code class="language-bash">POD=$(kubectl get pods -l app=myapp --no-headers | awk '$3==&quot;Running&quot;{print $1; exit}')
+kubectl exec -it $POD -- /bin/bash
+</code></pre>
+<p>Inside the Pod:</p>
+<pre><code class="language-bash">printenv APP_MESSAGE APP_ENV
+exit
+</code></pre>
+<p><em>Expected:</em> <code>Hello from ConfigMap</code> and <code>lab</code>.</p>
+<h3>Step 13 — Read the logs and the event history</h3>
+<pre><code class="language-bash">kubectl logs $POD
+kubectl get events --sort-by=.metadata.creationTimestamp
+</code></pre>
+<p><em>Expected:</em> the logs show <code>Starting app v2 with message: Hello from ConfigMap</code> plus request lines. The events show the whole story: Scheduled, Pulled, Created and Started for good Pods, <code>Failed</code> and <code>BackOff</code> for the <code>v99</code> Pod, and <code>ScalingReplicaSet</code> lines for the update and the rollback. Kubernetes drops events after about an hour.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">kubectl delete -f deployment.yaml -f configmap.yaml
+minikube stop
+</code></pre>
+
+<footer>CCAI lab reference · <a href="index.html">All labs</a></footer>
+</main></body></html>

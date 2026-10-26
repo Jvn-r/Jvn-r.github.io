@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Lab 4 — Persistent storage with Docker volumes — CCAI lab reference">
+<title>Lab 4 — Persistent storage with Docker volumes | CCAI Labs</title>
+<style>
+:root{color-scheme:dark;--bg:#080a12;--panel:#101522;--text:#e3e9f5;--muted:#a0aec4;--accent:#8ecbff;--border:#29354a;--code:#070b12}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{width:min(100% - 2rem,1000px);margin:0 auto;padding:2rem 0 4rem}
+header{padding:1.5rem;margin-bottom:1.5rem;background:#101522;border:1px solid var(--border);border-radius:12px}
+.eyebrow{color:var(--accent);font:700 .8rem ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase}
+h1,h2,h3{line-height:1.25}h1{font-size:clamp(1.8rem,4vw,2.5rem);margin:.5rem 0}h2{margin-top:2rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}h3{color:var(--accent);margin-top:1.5rem}
+p,li{max-width:85ch}a{color:var(--accent)}strong{color:#fff}
+pre{overflow-x:auto;padding:1rem;background:var(--code);border:1px solid var(--border);border-radius:8px;line-height:1.5;tab-size:2}
+pre code{white-space:pre;font: .9rem ui-monospace,SFMono-Regular,Consolas,monospace}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#1a2435;padding:.1rem .3rem;border-radius:4px}
+pre code{background:transparent;padding:0}
+table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}th,td{border:1px solid var(--border);padding:.65rem;text-align:left;vertical-align:top}th{background:var(--panel)}
+blockquote{border-left:3px solid var(--accent);padding:.5rem 1rem;margin-left:0;color:var(--muted);background:var(--panel)}
+nav{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 2rem}nav a{border:1px solid var(--border);padding:.35rem .6rem;border-radius:6px;text-decoration:none}
+footer{border-top:1px solid var(--border);margin-top:3rem;padding-top:1rem;color:var(--muted);font-size:.9rem}
+@media(max-width:600px){main{width:min(100% - 1.2rem,1000px);padding-top:.5rem}header{padding:1rem}body{font-size:15px}pre{padding:.75rem}pre code{font-size:.8rem}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">CCAI · Lab Reference · 04</div><h1>Lab 4 — Persistent storage with Docker volumes</h1><p>Terminal-friendly lab notes for w3m.</p></header>
+<nav><a href="index.html">Lab index</a><a href="1.html">Lab 1</a><a href="2.html">Lab 2</a><a href="3.html">Lab 3</a><a href="4.html">Lab 4</a><a href="5.html">Lab 5</a><a href="6.html">Lab 6</a><a href="7.html">Lab 7</a><a href="8.html">Lab 8</a><a href="9.html">Lab 9</a><a href="10.html">Lab 10</a></nav>
+<p>Goal: run PostgreSQL 15 with a named volume, create a table with rows, delete the container, start a new one on the same volume and show the data survived.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version
+</code></pre>
+<h3>Step 1 — Create a named volume</h3>
+<pre><code class="language-bash">docker volume create postgres_data
+docker volume ls
+</code></pre>
+<h3>Step 2 — Run PostgreSQL 15 with the volume attached</h3>
+<pre><code class="language-bash">docker run -d --name lab-postgres \
+  -e POSTGRES_PASSWORD=admin123 \
+  -e POSTGRES_DB=labdb \
+  -v postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15
+</code></pre>
+<p>The first run pulls the image. Wait 5–10 seconds until <code>docker logs lab-postgres</code> ends with <code>database system is ready to accept connections</code>, or the next step fails with a connection error.</p>
+<h3>Step 3 — Connect with psql inside the container</h3>
+<pre><code class="language-bash">docker exec -it lab-postgres psql -U postgres -d labdb
+</code></pre>
+<p>If the lab wants a client on the host instead: <code>sudo apt-get install -y postgresql-client</code>, then <code>psql -h localhost -U postgres -d labdb</code> (password <code>admin123</code>).</p>
+<h3>Step 4 — Create a table and insert rows</h3>
+<p>At the <code>labdb=#</code> prompt:</p>
+<pre><code class="language-sql">CREATE TABLE students (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  department VARCHAR(100)
+);
+
+INSERT INTO students (name, department) VALUES
+('Aryaman', 'CSE'),
+('Rahul', 'AI'),
+('Priya', 'Data Science');
+
+SELECT * FROM students;
+\q
+</code></pre>
+<p><em>Expected:</em> the <code>SELECT</code> shows 3 rows.</p>
+<h3>Step 5 — Stop and remove the container</h3>
+<pre><code class="language-bash">docker stop lab-postgres
+docker rm lab-postgres
+docker ps -a
+</code></pre>
+<h3>Step 6 — Verify the volume still exists</h3>
+<pre><code class="language-bash">docker volume ls
+</code></pre>
+<p><em>Expected:</em> <code>postgres_data</code> is still listed although the container is gone.</p>
+<h3>Step 7 — Recreate the container on the same volume</h3>
+<pre><code class="language-bash">docker run -d --name lab-postgres \
+  -e POSTGRES_PASSWORD=admin123 \
+  -e POSTGRES_DB=labdb \
+  -v postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15
+</code></pre>
+<p>Postgres only applies <code>POSTGRES_PASSWORD</code> and <code>POSTGRES_DB</code> when the data directory is empty. Here it already holds your data, so those values are ignored.</p>
+<h3>Step 8 — Verify the old data survived</h3>
+<p>Wait a few seconds, then:</p>
+<pre><code class="language-bash">docker exec -it lab-postgres psql -U postgres -d labdb
+</code></pre>
+<pre><code class="language-sql">SELECT * FROM students;
+\q
+</code></pre>
+<p><em>Expected:</em> the same 3 rows, which shows the volume kept the data. One-liner version: <code>docker exec lab-postgres psql -U postgres -d labdb -c &quot;SELECT * FROM students;&quot;</code>.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker rm -f lab-postgres
+docker volume rm postgres_data
+</code></pre>
+
+<footer>CCAI lab reference · <a href="index.html">All labs</a></footer>
+</main></body></html>
