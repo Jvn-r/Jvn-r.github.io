@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BAI701 lab exam study guide covering Docker, Docker Compose, Kubernetes, and Minikube.">
+  <title>BAI701 Lab Exam Study Guide — Docker &amp; Kubernetes</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080a12;
+      --panel: #101522;
+      --panel-2: #151c2b;
+      --text: #e3e9f5;
+      --muted: #a0aec4;
+      --accent: #8ecbff;
+      --border: #29354a;
+      --code-bg: #070b12;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 1.5rem; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.7 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .page {
+      width: min(100% - 2rem, 1000px);
+      margin: 0 auto;
+      padding: 3rem 0 5rem;
+    }
+    header {
+      padding: 2rem;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, #152238, #101522 70%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+    }
+    .eyebrow {
+      margin: 0 0 .5rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font: 700 .78rem/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    h1, h2, h3, h4 { line-height: 1.25; }
+    h1 { margin: 0; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.035em; }
+    header p { color: var(--muted); margin-bottom: 0; }
+    h2 {
+      margin-top: 3rem;
+      padding-bottom: .65rem;
+      border-bottom: 1px solid var(--border);
+      font-size: clamp(1.5rem, 3vw, 2rem);
+    }
+    h3 { margin-top: 2rem; font-size: 1.2rem; color: var(--accent); }
+    h4 { font-size: 1.05rem; }
+    p { margin: .8rem 0 1rem; }
+    a { color: var(--accent); text-underline-offset: 3px; }
+    a:hover { color: #c5e5ff; }
+    ul, ol { padding-left: 1.5rem; }
+    li { padding-left: .2rem; margin: .25rem 0; }
+    strong { color: #fff; }
+    code {
+      padding: .12rem .35rem;
+      background: #1a2435;
+      border: 1px solid #28364c;
+      border-radius: 5px;
+      font: .9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      overflow-x: auto;
+      padding: 1.15rem 1.25rem;
+      margin: 1rem 0 1.5rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #d5e4f7;
+      line-height: 1.55;
+      tab-size: 2;
+      -webkit-overflow-scrolling: touch;
+    }
+    pre code {
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      font-size: .88rem;
+      white-space: pre;
+      overflow-wrap: normal;
+    }
+    blockquote {
+      margin: 1rem 0;
+      padding: .75rem 1rem;
+      border-left: 3px solid var(--accent);
+      background: var(--panel);
+      color: var(--muted);
+    }
+    .table-wrap {
+      margin: 1.25rem 0 2rem;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    th, td { padding: .8rem 1rem; text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+    th { background: var(--panel-2); color: var(--accent); }
+    td { background: var(--panel); }
+    tr:last-child td { border-bottom: 0; }
+    .back-top {
+      display: inline-block;
+      margin-top: 2rem;
+      padding: .65rem .9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; }
+    @media (max-width: 640px) {
+      .page { width: min(100% - 1.25rem, 1000px); padding-top: 1rem; }
+      header { padding: 1.25rem; border-radius: 12px; }
+      body { font-size: 15px; }
+      pre { padding: .9rem; }
+      pre code { font-size: .8rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header id="top">
+      <p class="eyebrow">BAI701 · Lab Exam Reference</p>
+      <h1>Docker &amp; Kubernetes</h1>
+      <p>Lab exam study guide · October 26, 2026 · @Zivot</p>
+    </header>
+    <h1>BAI701 Lab Exam Study Guide — Docker &amp; Kubernetes</h1>
+<p>Oct 26, 2026 · @Zivot</p>
+<h2>Read this first</h2>
+<p>Every lab below starts from a fresh Ubuntu machine and ends with a cleanup block, so you can do any one of them alone. Your manual's terminal screenshots are from Ubuntu lab PCs.</p>
+<p><strong>Docker install used in every lab</strong> (the same <code>docker.io</code> package your Lab 1 output shows):</p>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<ul>
+<li><code>newgrp docker</code> applies the docker group in the current terminal, so you don't need <code>sudo</code> before every command. If you still get <code>permission denied ... docker.sock</code>, log out and back in, or prefix commands with <code>sudo</code>.</li>
+<li>Windows/macOS: install Docker Desktop, start it, and wait until it says the engine is running. The commands are identical.</li>
+<li>If <code>apt</code> can't find a package, use <code>curl -fsSL https://get.docker.com | sudo sh</code> instead. It installs Docker Engine <strong>and</strong> the Compose plugin. Use it in place of <code>docker.io</code>, not on top of it.</li>
+</ul>
+<p><strong>Typos fixed from the manual.</strong> The PDF lost its underscores: <code>Flask( name )</code> is <code>Flask(__name__)</code>, <code>if name == " main "</code> is <code>if __name__ == "__main__":</code>, <code>depends on</code> is <code>depends_on</code>, and <code>docker-compose. yml</code> is <code>docker-compose.yml</code>. Everything below is corrected.</p>
+<p><strong>How to use it.</strong> Each lab runs Step 0 (install), numbered steps, expected result, then cleanup. File blocks use <code>cat &gt; file &lt;&lt;'EOF'</code>, so you can paste a whole block into the terminal; typing the same text in <code>nano</code> gives the same file. Run a lab's cleanup before starting the next one, or ports 5000, 5001, 5432 and 8080 will clash.</p>
+<h2>Lab 1 — Docker installation and container lifecycle</h2>
+<p>Goal: install Docker, pull <code>alpine</code> and <code>nginx</code>, run a container, list running and stopped containers, then stop, start and remove them.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker</code></pre>
+<h3>Step 1 — Verify the installation</h3>
+<pre><code class="language-bash">docker version
+docker info</code></pre>
+<p><em>Expected:</em> client and server details and engine information, no error.</p>
+<h3>Step 2 — Pull the official images</h3>
+<pre><code class="language-bash">docker pull alpine
+docker pull nginx</code></pre>
+<h3>Step 3 — Verify the downloaded images</h3>
+<pre><code class="language-bash">docker images</code></pre>
+<p><em>Expected:</em> both <code>alpine</code> and <code>nginx</code> are listed.</p>
+<h3>Step 4 — Run nginx as a detached container</h3>
+<pre><code class="language-bash">docker run -d --name lab-nginx -p 8080:80 nginx
+curl http://localhost:8080</code></pre>
+<p><em>Expected:</em> a container ID is printed, and <code>curl</code> (or a browser at http://localhost:8080) shows the nginx welcome page.</p>
+<h3>Step 5 — Run alpine once (extra, not in the manual)</h3>
+<p>Alpine exits right after its command, which gives you a stopped container to see in <code>docker ps -a</code>.</p>
+<pre><code class="language-bash">docker run --name lab-alpine alpine echo &quot;Alpine is running&quot;</code></pre>
+<h3>Step 6 — List running containers</h3>
+<pre><code class="language-bash">docker ps</code></pre>
+<p><em>Expected:</em> only <code>lab-nginx</code>.</p>
+<h3>Step 7 — List all containers, including stopped ones</h3>
+<pre><code class="language-bash">docker ps -a</code></pre>
+<p><em>Expected:</em> <code>lab-nginx</code> (Up) and <code>lab-alpine</code> (Exited (0)).</p>
+<h3>Step 8 — Stop the container</h3>
+<pre><code class="language-bash">docker stop lab-nginx</code></pre>
+<h3>Step 9 — Start the stopped container again</h3>
+<pre><code class="language-bash">docker start lab-nginx
+docker ps</code></pre>
+<h3>Step 10 — Stop and remove the containers</h3>
+<pre><code class="language-bash">docker stop lab-nginx
+docker rm lab-nginx
+docker rm lab-alpine
+docker ps -a</code></pre>
+<p><em>Expected:</em> an empty list. A running container can't be removed until it is stopped (or removed with <code>docker rm -f</code>).</p>
+<h2>Lab 2 — Build and run an app with a Dockerfile</h2>
+<p>Goal: package a Flask app on port 5000 with a Dockerfile, build it as <code>myapp:v1</code>, tag it <code>1.0</code>, run it with port mapping and reach it with <code>curl</code>. You don't need Python on the host; Flask is installed inside the image.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Create the project folder and <code>app.py</code></h3>
+<pre><code class="language-bash">mkdir -p ~/lab2 &amp;&amp; cd ~/lab2
+cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def home():
+    return &quot;Hello from the CCAI Docker Lab!&quot;
+
+@app.route(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;healthy&quot;}
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF</code></pre>
+<h3>Step 2 — Create <code>requirements.txt</code></h3>
+<pre><code class="language-bash">echo &quot;Flask==3.1.0&quot; &gt; requirements.txt</code></pre>
+<h3>Step 3 — Create the <code>Dockerfile</code> (no extension)</h3>
+<pre><code class="language-bash">cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF</code></pre>
+<p>The <code>apt-get</code> line installs bash, procps and curl so that Lab 3 can open a shell and run <code>ps aux</code> inside the container.</p>
+<h3>Step 4 — Build the image</h3>
+<pre><code class="language-bash">docker build -t myapp:v1 .</code></pre>
+<h3>Step 5 — Verify the image</h3>
+<pre><code class="language-bash">docker images</code></pre>
+<p><em>Expected:</em> <code>myapp</code> with tag <code>v1</code> is listed.</p>
+<h3>Step 6 — Add a second version tag</h3>
+<pre><code class="language-bash">docker tag myapp:v1 myapp:1.0
+docker images</code></pre>
+<p><em>Expected:</em> <code>myapp:v1</code> and <code>myapp:1.0</code> share the same IMAGE ID.</p>
+<h3>Step 7 — Run the container with port mapping</h3>
+<pre><code class="language-bash">docker run -d --name myapp-container -p 5000:5000 myapp:v1</code></pre>
+<h3>Step 8 — Test from the host</h3>
+<pre><code class="language-bash">curl http://localhost:5000
+curl http://localhost:5000/health</code></pre>
+<p><em>Expected:</em> <code>Hello from the CCAI Docker Lab!</code> and <code>{"status":"healthy"}</code>. A browser at http://localhost:5000 shows the same text.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker rm -f myapp-container</code></pre>
+<h2>Lab 3 — Docker debugging and troubleshooting</h2>
+<p>Goal: read logs, follow them live, open a shell inside a running container, then break the app on purpose and diagnose it from outside with <code>docker logs</code> and <code>docker inspect</code>. This lab runs on the Lab 2 app, so Steps 1 and 2 rebuild it from scratch.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Create the Lab 2 app files</h3>
+<pre><code class="language-bash">mkdir -p ~/lab3 &amp;&amp; cd ~/lab3
+
+cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def home():
+    return &quot;Hello from the CCAI Docker Lab!&quot;
+
+@app.route(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;healthy&quot;}
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF
+
+echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF</code></pre>
+<h3>Step 2 — Build and run the Lab 2 container</h3>
+<pre><code class="language-bash">docker build -t myapp:v1 .
+docker run -d --name myapp-container -p 5000:5000 myapp:v1</code></pre>
+<h3>Step 3 — Confirm the container is running</h3>
+<pre><code class="language-bash">docker ps</code></pre>
+<h3>Step 4 — View the container logs</h3>
+<pre><code class="language-bash">docker logs myapp-container</code></pre>
+<p><em>Expected:</em> Flask startup lines such as <code>Running on http://0.0.0.0:5000</code>.</p>
+<h3>Step 5 — Follow the logs in real time</h3>
+<p>Terminal 1:</p>
+<pre><code class="language-bash">docker logs -f myapp-container</code></pre>
+<p>Terminal 2:</p>
+<pre><code class="language-bash">curl http://localhost:5000</code></pre>
+<p><em>Expected:</em> each request appears in terminal 1 as a <code>GET / HTTP/1.1 200</code> line. Press Ctrl+C in terminal 1 to stop following.</p>
+<h3>Step 6 — Open a shell inside the running container</h3>
+<pre><code class="language-bash">docker exec -it myapp-container /bin/bash</code></pre>
+<p>Then, inside the container:</p>
+<pre><code class="language-bash">pwd
+ls
+ps aux
+exit</code></pre>
+<p><em>Expected:</em> <code>/app</code>, then <code>Dockerfile  app.py  requirements.txt</code>, then a process list that includes <code>python app.py</code>.</p>
+<h3>Step 7 — Change <code>app.py</code> to require an environment variable</h3>
+<p>Back on the host, in <code>~/lab3</code>:</p>
+<pre><code class="language-bash">cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+APP_MESSAGE = os.environ[&quot;APP_MESSAGE&quot;]
+
+@app.route(&quot;/&quot;)
+def home():
+    return APP_MESSAGE
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF</code></pre>
+<p><code>os.environ["APP_MESSAGE"]</code> raises a <code>KeyError</code> when the variable is not set. That is the deliberate failure.</p>
+<h3>Step 8 — Build the deliberately broken image</h3>
+<pre><code class="language-bash">docker build -t myapp:broken .</code></pre>
+<h3>Step 9 — Run it without the required variable</h3>
+<pre><code class="language-bash">docker run --name broken-app myapp:broken</code></pre>
+<p><em>Expected:</em> a traceback ending in <code>KeyError: 'APP_MESSAGE'</code>, and the container exits.</p>
+<h3>Step 10 — Inspect the stopped container</h3>
+<pre><code class="language-bash">docker ps -a</code></pre>
+<p><em>Expected:</em> <code>broken-app</code> with status <code>Exited (1)</code>.</p>
+<h3>Step 11 — Diagnose with logs</h3>
+<pre><code class="language-bash">docker logs broken-app</code></pre>
+<h3>Step 12 — Read the exit code with <code>docker inspect</code></h3>
+<pre><code class="language-bash">docker inspect broken-app --format=&#x27;{{.State.ExitCode}}&#x27;
+docker inspect broken-app --format=&#x27;{{.State.Error}}&#x27;</code></pre>
+<p><em>Expected:</em> <code>1</code>, then an empty line (the failure was inside the app, not in Docker itself). Exit code 0 means success; anything else means failure.</p>
+<h3>Step 13 — Run it correctly with the variable supplied</h3>
+<pre><code class="language-bash">docker run -d --name fixed-app -e APP_MESSAGE=&quot;Application is working again&quot; -p 5001:5000 myapp:broken
+curl http://localhost:5001</code></pre>
+<p>The host port is 5001 because 5000 is still used by <code>myapp-container</code>.</p>
+<p><em>Expected:</em> <code>Application is working again</code>.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker rm -f myapp-container broken-app fixed-app</code></pre>
+<h2>Lab 4 — Persistent storage with Docker volumes</h2>
+<p>Goal: run PostgreSQL 15 with a named volume, create a table with rows, delete the container, start a new one on the same volume and show the data survived.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Create a named volume</h3>
+<pre><code class="language-bash">docker volume create postgres_data
+docker volume ls</code></pre>
+<h3>Step 2 — Run PostgreSQL 15 with the volume attached</h3>
+<pre><code class="language-bash">docker run -d --name lab-postgres \
+  -e POSTGRES_PASSWORD=admin123 \
+  -e POSTGRES_DB=labdb \
+  -v postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15</code></pre>
+<p>The first run pulls the image. Wait 5–10 seconds until <code>docker logs lab-postgres</code> ends with <code>database system is ready to accept connections</code>, or the next step fails with a connection error.</p>
+<h3>Step 3 — Connect with psql inside the container</h3>
+<pre><code class="language-bash">docker exec -it lab-postgres psql -U postgres -d labdb</code></pre>
+<p>If the lab wants a client on the host instead: <code>sudo apt-get install -y postgresql-client</code>, then <code>psql -h localhost -U postgres -d labdb</code> (password <code>admin123</code>).</p>
+<h3>Step 4 — Create a table and insert rows</h3>
+<p>At the <code>labdb=#</code> prompt:</p>
+<pre><code class="language-sql">CREATE TABLE students (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  department VARCHAR(100)
+);
+
+INSERT INTO students (name, department) VALUES
+(&#x27;Aryaman&#x27;, &#x27;CSE&#x27;),
+(&#x27;Rahul&#x27;, &#x27;AI&#x27;),
+(&#x27;Priya&#x27;, &#x27;Data Science&#x27;);
+
+SELECT * FROM students;
+\q</code></pre>
+<p><em>Expected:</em> the <code>SELECT</code> shows 3 rows.</p>
+<h3>Step 5 — Stop and remove the container</h3>
+<pre><code class="language-bash">docker stop lab-postgres
+docker rm lab-postgres
+docker ps -a</code></pre>
+<h3>Step 6 — Verify the volume still exists</h3>
+<pre><code class="language-bash">docker volume ls</code></pre>
+<p><em>Expected:</em> <code>postgres_data</code> is still listed although the container is gone.</p>
+<h3>Step 7 — Recreate the container on the same volume</h3>
+<pre><code class="language-bash">docker run -d --name lab-postgres \
+  -e POSTGRES_PASSWORD=admin123 \
+  -e POSTGRES_DB=labdb \
+  -v postgres_data:/var/lib/postgresql/data \
+  -p 5432:5432 \
+  postgres:15</code></pre>
+<p>Postgres only applies <code>POSTGRES_PASSWORD</code> and <code>POSTGRES_DB</code> when the data directory is empty. Here it already holds your data, so those values are ignored.</p>
+<h3>Step 8 — Verify the old data survived</h3>
+<p>Wait a few seconds, then:</p>
+<pre><code class="language-bash">docker exec -it lab-postgres psql -U postgres -d labdb</code></pre>
+<pre><code class="language-sql">SELECT * FROM students;
+\q</code></pre>
+<p><em>Expected:</em> the same 3 rows, which shows the volume kept the data. One-liner version: <code>docker exec lab-postgres psql -U postgres -d labdb -c "SELECT * FROM students;"</code>.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker rm -f lab-postgres
+docker volume rm postgres_data</code></pre>
+<h2>Lab 5 — Docker networking with a custom bridge network</h2>
+<p>Goal: show that containers on a custom bridge network reach each other by name, and that a container on the default bridge cannot reach them.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Create the custom bridge network</h3>
+<pre><code class="language-bash">docker network create lab-network
+docker network ls</code></pre>
+<p><em>Expected:</em> <code>lab-network</code> appears with driver <code>bridge</code> next to the default <code>bridge</code>, <code>host</code> and <code>none</code>.</p>
+<h3>Step 2 — Run an nginx web container on the custom network</h3>
+<pre><code class="language-bash">docker run -d --name web --network lab-network nginx</code></pre>
+<h3>Step 3 — Run an Alpine client container on the same network</h3>
+<pre><code class="language-bash">docker run -dit --name client --network lab-network alpine</code></pre>
+<p><code>-dit</code> (detached, interactive, with a terminal) keeps Alpine running in the background. Without it Alpine would exit at once.</p>
+<h3>Step 4 — From the client, reach nginx by container name</h3>
+<pre><code class="language-bash">docker exec -it client sh</code></pre>
+<p>Inside the container:</p>
+<pre><code class="language-sh">ping -c 3 web
+wget -qO- http://web
+exit</code></pre>
+<p><em>Expected:</em> <code>web</code> resolves to an IP address and replies, and <code>wget</code> prints the nginx welcome page HTML. Docker's built-in DNS resolves container names on user-defined networks.</p>
+<p>Optional: <code>docker network inspect lab-network</code> lists both containers.</p>
+<h3>Step 5 — Run a third container on the default bridge network</h3>
+<pre><code class="language-bash">docker run -dit --name outsider alpine</code></pre>
+<h3>Step 6 — Try to reach the custom-network container from the outsider</h3>
+<pre><code class="language-bash">docker exec -it outsider sh</code></pre>
+<p>Inside the container:</p>
+<pre><code class="language-sh">ping -c 3 web
+wget -qO- http://web
+exit</code></pre>
+<p><em>Expected:</em> <code>ping: bad address 'web'</code> and <code>wget: bad address 'web'</code>. The outsider is not on <code>lab-network</code>, and the default bridge has no name resolution. Reaching <code>web</code> by IP address fails too, because Docker isolates the two networks.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker rm -f web client outsider
+docker network rm lab-network</code></pre>
+<h2>Lab 6 — Multi-container app with Docker Compose</h2>
+<p>Goal: define a web service and a database in one <code>docker-compose.yml</code>, start them together, read one service's logs, open a shell in a service and tear everything down.</p>
+<h3>Step 0 — Install Docker and the Compose plugin (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version
+docker compose version</code></pre>
+<p><code>docker compose</code> (with a space) is Compose v2, installed as a Docker plugin. If the <code>docker-compose-v2</code> package isn't found, install Docker with <code>curl -fsSL https://get.docker.com | sudo sh</code> instead of <code>docker.io</code>; that script includes the plugin.</p>
+<h3>Step 1 — Create the project: app, requirements and Dockerfile</h3>
+<p>The web service builds from a Dockerfile (<code>build: .</code>), so this folder needs the Lab 2 <code>Dockerfile</code> and <code>requirements.txt</code> plus a simple <code>app.py</code>.</p>
+<pre><code class="language-bash">mkdir -p ~/myapp-compose &amp;&amp; cd ~/myapp-compose
+
+cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def home():
+    return &quot;Docker Compose application is running!&quot;
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF
+
+echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF</code></pre>
+<h3>Step 2 — Create <code>docker-compose.yml</code></h3>
+<pre><code class="language-bash">cat &gt; docker-compose.yml &lt;&lt;&#x27;EOF&#x27;
+services:
+  web:
+    build: .
+    ports:
+      - &quot;5000:5000&quot;
+    depends_on:
+      - database
+
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: labdb
+    volumes:
+      - compose_db_data:/var/lib/postgresql/data
+
+volumes:
+  compose_db_data:
+EOF</code></pre>
+<p><code>depends_on</code> makes Compose start <code>database</code> before <code>web</code>. It waits for the container to start, not for Postgres to be ready. <code>compose_db_data</code> is a named volume that keeps the database files.</p>
+<h3>Step 3 — Start the stack</h3>
+<pre><code class="language-bash">docker compose up -d</code></pre>
+<p>The first run builds the web image and pulls <code>postgres:15</code>, so it takes a minute.</p>
+<h3>Step 4 — Verify both services are running</h3>
+<pre><code class="language-bash">docker compose ps</code></pre>
+<p><em>Expected:</em> <code>web</code> and <code>database</code> both listed as running.</p>
+<h3>Step 5 — Test the web service</h3>
+<pre><code class="language-bash">curl http://localhost:5000</code></pre>
+<p><em>Expected:</em> <code>Docker Compose application is running!</code></p>
+<h3>Step 6 — View and follow the web service logs</h3>
+<pre><code class="language-bash">docker compose logs web
+docker compose logs -f web</code></pre>
+<p>Press Ctrl+C to stop following. Run <code>curl http://localhost:5000</code> in a second terminal to see requests appear.</p>
+<h3>Step 7 — Inspect the running web service</h3>
+<pre><code class="language-bash">docker compose exec web /bin/sh</code></pre>
+<p>Inside the container:</p>
+<pre><code class="language-sh">ls
+exit</code></pre>
+<p><em>Expected:</em> <code>Dockerfile  app.py  docker-compose.yml  requirements.txt</code>, because <code>COPY . .</code> copied the whole folder into the image.</p>
+<h3>Step 8 — Bring the stack down</h3>
+<pre><code class="language-bash">docker compose down
+docker compose ps</code></pre>
+<p><em>Expected:</em> <code>docker compose ps</code> shows an empty list.</p>
+<h3>Step 9 — Verify the containers and network are gone</h3>
+<pre><code class="language-bash">docker ps -a
+docker network ls
+docker volume ls</code></pre>
+<p><em>Expected:</em> both containers and the Compose network (<code>myapp-compose_default</code>) are gone. The named volume (<code>myapp-compose_compose_db_data</code>) is still listed, because <code>down</code> keeps volumes unless you add <code>-v</code>.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">docker compose down -v</code></pre>
+<h2>Lab 7 — Kubernetes Pods with Minikube</h2>
+<p>Goal: start a local Kubernetes cluster with Minikube, create an nginx Pod from a YAML manifest, inspect it, then delete it and see that nothing recreates it.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<p>Minikube runs the cluster inside a Docker container (the <code>docker</code> driver), so Docker comes first.</p>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Install kubectl</h3>
+<pre><code class="language-bash">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
+kubectl version --client</code></pre>
+<h3>Step 2 — Install Minikube</h3>
+<pre><code class="language-bash">curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+rm minikube-linux-amd64
+minikube version</code></pre>
+<p>These are the x86-64 builds, which fit the lab PCs. On an ARM machine, replace <code>amd64</code> with <code>arm64</code> in both steps.</p>
+<h3>Step 3 — Start the cluster</h3>
+<pre><code class="language-bash">minikube start --driver=docker</code></pre>
+<p>Run it as your normal user, not with <code>sudo</code>; Minikube refuses the Docker driver as root. The first start downloads images and takes a few minutes.</p>
+<p><em>Expected:</em> the output ends with <code>Done! kubectl is now configured to use "minikube" cluster</code>.</p>
+<h3>Step 4 — Verify cluster health</h3>
+<pre><code class="language-bash">kubectl cluster-info
+kubectl get nodes</code></pre>
+<p><em>Expected:</em> the control plane and CoreDNS URLs, and a node named <code>minikube</code> with status <code>Ready</code>.</p>
+<h3>Step 5 — Create the Pod manifest <code>pod.yaml</code></h3>
+<pre><code class="language-bash">cat &gt; pod.yaml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+EOF</code></pre>
+<p>The four top-level fields to remember: <code>apiVersion</code> (v1 for a Pod), <code>kind</code> (Pod), <code>metadata</code> (name and labels), <code>spec</code> (the list of containers).</p>
+<h3>Step 6 — Create the Pod</h3>
+<pre><code class="language-bash">kubectl apply -f pod.yaml</code></pre>
+<h3>Step 7 — Verify the Pod reaches Running</h3>
+<pre><code class="language-bash">kubectl get pods
+kubectl get pods -w</code></pre>
+<p><em>Expected:</em> <code>nginx-pod</code> goes from <code>ContainerCreating</code> to <code>Running</code> with READY <code>1/1</code>. Press Ctrl+C to leave watch mode.</p>
+<h3>Step 8 — Inspect the Pod and read its Events</h3>
+<pre><code class="language-bash">kubectl describe pod nginx-pod</code></pre>
+<p><em>Expected:</em> the Events section at the bottom shows Scheduled, Pulling, Pulled, Created and Started.</p>
+<h3>Step 9 — Delete the Pod</h3>
+<pre><code class="language-bash">kubectl delete pod nginx-pod
+kubectl get pods</code></pre>
+<p><em>Expected:</em> <code>No resources found in default namespace.</code> A bare Pod has no controller managing it, so nothing recreates it. A Deployment (Lab 8) does.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">minikube stop</code></pre>
+<p><code>minikube delete</code> removes the cluster completely.</p>
+<h2>Lab 8 — Kubernetes Deployments and scaling</h2>
+<p>Goal: run the Lab 2 image as a Deployment with 2 replicas, scale it to 5, watch the controller replace a deleted Pod, and scale back to 2. The Deployment needs the <code>myapp:v1</code> image from Lab 2, so Steps 4 to 6 rebuild it and load it into Minikube.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Install kubectl</h3>
+<pre><code class="language-bash">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
+kubectl version --client</code></pre>
+<h3>Step 2 — Install Minikube</h3>
+<pre><code class="language-bash">curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+rm minikube-linux-amd64
+minikube version</code></pre>
+<p>On an ARM machine, replace <code>amd64</code> with <code>arm64</code> in Steps 1 and 2.</p>
+<h3>Step 3 — Start the cluster</h3>
+<pre><code class="language-bash">minikube start --driver=docker
+kubectl get nodes</code></pre>
+<p>Run it as your normal user, not with <code>sudo</code>.</p>
+<h3>Step 4 — Create the Lab 2 app files</h3>
+<pre><code class="language-bash">mkdir -p ~/lab8 &amp;&amp; cd ~/lab8
+
+cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def home():
+    return &quot;Hello from the CCAI Docker Lab!&quot;
+
+@app.route(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;healthy&quot;}
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF
+
+echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF</code></pre>
+<h3>Step 5 — Build <code>myapp:v1</code> locally</h3>
+<pre><code class="language-bash">docker build -t myapp:v1 .
+docker images</code></pre>
+<h3>Step 6 — Load the image into Minikube</h3>
+<pre><code class="language-bash">minikube image load myapp:v1
+minikube image ls | grep myapp</code></pre>
+<p>The Minikube cluster has its own image store, separate from your host Docker. Without this step the Pods can't find <code>myapp:v1</code>.</p>
+<h3>Step 7 — Create <code>deployment.yaml</code></h3>
+<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+EOF</code></pre>
+<p><code>selector.matchLabels</code> must match <code>template.metadata.labels</code>; that is how the Deployment finds its Pods. <code>imagePullPolicy: Never</code> tells Kubernetes to use the image already loaded in Minikube and never pull from a registry.</p>
+<h3>Step 8 — Apply the Deployment</h3>
+<pre><code class="language-bash">kubectl apply -f deployment.yaml</code></pre>
+<h3>Step 9 — Verify the Deployment and its two Pods</h3>
+<pre><code class="language-bash">kubectl get deployments
+kubectl get pods</code></pre>
+<p><em>Expected:</em> <code>myapp-deployment</code> shows READY <code>2/2</code>, and two Pods are <code>Running</code>.</p>
+<h3>Step 10 — Scale to five replicas</h3>
+<pre><code class="language-bash">kubectl scale deployment myapp-deployment --replicas=5
+kubectl get pods -w</code></pre>
+<p>Press Ctrl+C once all five show <code>Running</code>.</p>
+<h3>Step 11 — Check the rollout status</h3>
+<pre><code class="language-bash">kubectl rollout status deployment/myapp-deployment</code></pre>
+<p><em>Expected:</em> <code>deployment "myapp-deployment" successfully rolled out</code>.</p>
+<h3>Step 12 — Delete one Pod manually</h3>
+<pre><code class="language-bash">kubectl get pods
+kubectl delete pod &lt;POD_NAME&gt;
+kubectl get pods</code></pre>
+<p>Replace <code>&lt;POD_NAME&gt;</code> with a name copied from the list. To skip the copying: <code>kubectl delete $(kubectl get pods -o name | head -1)</code>.</p>
+<p><em>Expected:</em> a replacement Pod with a very young AGE appears at once, so the count stays at 5. That is the Deployment controller keeping the desired state.</p>
+<h3>Step 13 — Scale back to two replicas</h3>
+<pre><code class="language-bash">kubectl scale deployment myapp-deployment --replicas=2
+kubectl get pods</code></pre>
+<p><em>Expected:</em> the extra Pods show <code>Terminating</code> and then disappear, leaving 2 <code>Running</code>.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">kubectl delete -f deployment.yaml
+minikube stop</code></pre>
+<h2>Open-ended 1 — Exposing an app with a NodePort Service</h2>
+<p>Goal: expose the Lab 8 Deployment with a <code>NodePort</code> Service, reach it from outside the cluster, break the Service by pointing its selector at a label no Pod has, then fix it. This builds on Lab 8, so Steps 4 and 5 recreate the image and the Deployment.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Install kubectl</h3>
+<pre><code class="language-bash">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
+kubectl version --client</code></pre>
+<h3>Step 2 — Install Minikube</h3>
+<pre><code class="language-bash">curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+rm minikube-linux-amd64
+minikube version</code></pre>
+<h3>Step 3 — Start the cluster</h3>
+<pre><code class="language-bash">minikube start --driver=docker
+kubectl get nodes</code></pre>
+<h3>Step 4 — Create the app, build the image and load it into Minikube</h3>
+<pre><code class="language-bash">mkdir -p ~/oe1 &amp;&amp; cd ~/oe1
+
+cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route(&quot;/&quot;)
+def home():
+    return &quot;Hello from the CCAI Docker Lab!&quot;
+
+@app.route(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;healthy&quot;}
+
+if __name__ == &quot;__main__&quot;:
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF
+
+echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF
+
+docker build -t myapp:v1 .
+minikube image load myapp:v1</code></pre>
+<h3>Step 5 — Create and apply the Lab 8 Deployment</h3>
+<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:v1
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+EOF
+
+kubectl apply -f deployment.yaml
+kubectl get pods</code></pre>
+<p><em>Expected:</em> two Pods, <code>Running</code> within a few seconds.</p>
+<h3>Step 6 — Create the Service manifest <code>service.yaml</code></h3>
+<pre><code class="language-bash">cat &gt; service.yaml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  type: NodePort
+  selector:
+    app: myapp
+  ports:
+  - port: 5000
+    targetPort: 5000
+EOF</code></pre>
+<p><code>selector</code> must match the Pod label <code>app: myapp</code> from the Deployment. <code>port</code> is the Service's own port, <code>targetPort</code> is the container port. With no <code>nodePort</code> given, Kubernetes assigns one from 30000 to 32767.</p>
+<h3>Step 7 — Apply the Service and inspect the assigned NodePort</h3>
+<pre><code class="language-bash">kubectl apply -f service.yaml
+kubectl get svc myapp-service
+kubectl get endpoints myapp-service</code></pre>
+<p><em>Expected:</em> the PORT(S) column reads like <code>5000:31234/TCP</code>, where 31234 is the NodePort. The endpoints list shows two Pod IPs on port 5000.</p>
+<h3>Step 8 — Access the app from outside the cluster</h3>
+<pre><code class="language-bash">NODE_IP=$(minikube ip)
+NODE_PORT=$(kubectl get svc myapp-service -o jsonpath=&#x27;{.spec.ports[0].nodePort}&#x27;)
+echo &quot;$NODE_IP:$NODE_PORT&quot;
+curl http://$NODE_IP:$NODE_PORT
+curl http://$NODE_IP:$NODE_PORT/health</code></pre>
+<p><em>Expected:</em> <code>Hello from the CCAI Docker Lab!</code> and <code>{"status":"healthy"}</code>. The two variables only exist in this terminal. If the node IP isn't reachable (Docker driver on Windows or macOS), run <code>minikube service myapp-service --url</code> and <code>curl</code> the URL it prints.</p>
+<h3>Step 9 — Point the selector at a label no Pod has</h3>
+<pre><code class="language-bash">sed -i &#x27;s/app: myapp/app: wrongapp/&#x27; service.yaml
+kubectl apply -f service.yaml
+kubectl get endpoints myapp-service
+curl --max-time 5 http://$NODE_IP:$NODE_PORT</code></pre>
+<p><em>Expected:</em> ENDPOINTS shows <code>&lt;none&gt;</code> and <code>curl</code> fails (connection refused or timeout). The Pods are healthy, but the Service selects none of them, so no traffic is routed. You can also edit <code>service.yaml</code> in <code>nano</code> instead of using <code>sed</code>.</p>
+<h3>Step 10 — Correct the selector and confirm access is back</h3>
+<pre><code class="language-bash">sed -i &#x27;s/app: wrongapp/app: myapp/&#x27; service.yaml
+kubectl apply -f service.yaml
+kubectl get endpoints myapp-service
+curl http://$NODE_IP:$NODE_PORT</code></pre>
+<p><em>Expected:</em> two endpoints again and the greeting is returned on the same NodePort.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">kubectl delete -f service.yaml -f deployment.yaml
+minikube stop</code></pre>
+<h2>Open-ended 2 — ConfigMap, rolling updates and debugging</h2>
+<p>Goal: feed configuration to a Deployment from a ConfigMap, roll out a new image version, break the rollout with a bad image tag, diagnose <code>ImagePullBackOff</code>, roll back, then check the ConfigMap values, logs and events. This builds on Lab 8, so the app, image and Deployment are recreated here.</p>
+<h3>Step 0 — Install Docker (fresh machine)</h3>
+<pre><code class="language-bash">sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker --version</code></pre>
+<h3>Step 1 — Install kubectl</h3>
+<pre><code class="language-bash">curl -LO &quot;https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl&quot;
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+rm kubectl
+kubectl version --client</code></pre>
+<h3>Step 2 — Install Minikube</h3>
+<pre><code class="language-bash">curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+rm minikube-linux-amd64
+minikube version</code></pre>
+<h3>Step 3 — Start the cluster</h3>
+<pre><code class="language-bash">minikube start --driver=docker
+kubectl get nodes</code></pre>
+<h3>Step 4 — Create the app (it reads its message from an environment variable)</h3>
+<pre><code class="language-bash">mkdir -p ~/oe2 &amp;&amp; cd ~/oe2
+
+cat &gt; app.py &lt;&lt;&#x27;EOF&#x27;
+import os
+from flask import Flask
+
+app = Flask(__name__)
+
+APP_MESSAGE = os.environ.get(&quot;APP_MESSAGE&quot;, &quot;no message set&quot;)
+VERSION = &quot;v1&quot;
+
+@app.route(&quot;/&quot;)
+def home():
+    return f&quot;{APP_MESSAGE} | version: {VERSION}&quot;
+
+@app.route(&quot;/health&quot;)
+def health():
+    return {&quot;status&quot;: &quot;healthy&quot;}
+
+if __name__ == &quot;__main__&quot;:
+    print(f&quot;Starting app {VERSION} with message: {APP_MESSAGE}&quot;, flush=True)
+    app.run(host=&quot;0.0.0.0&quot;, port=5000)
+EOF
+
+echo &quot;Flask==3.1.0&quot; &gt; requirements.txt
+
+cat &gt; Dockerfile &lt;&lt;&#x27;EOF&#x27;
+FROM python:3.12-slim
+WORKDIR /app
+RUN apt-get update &amp;&amp; \
+    apt-get install -y bash procps curl &amp;&amp; \
+    rm -rf /var/lib/apt/lists/*
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+EOF</code></pre>
+<h3>Step 5 — Build <code>myapp:v1</code> and load it into Minikube</h3>
+<pre><code class="language-bash">docker build -t myapp:v1 .
+minikube image load myapp:v1</code></pre>
+<h3>Step 6 — Create the ConfigMap</h3>
+<pre><code class="language-bash">cat &gt; configmap.yaml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp-config
+data:
+  APP_MESSAGE: &quot;Hello from ConfigMap&quot;
+  APP_ENV: &quot;lab&quot;
+EOF
+
+kubectl apply -f configmap.yaml
+kubectl get configmap myapp-config</code></pre>
+<h3>Step 7 — Create a Deployment that loads the ConfigMap as environment variables</h3>
+<pre><code class="language-bash">cat &gt; deployment.yaml &lt;&lt;&#x27;EOF&#x27;
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:v1
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: myapp-config
+EOF
+
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp-deployment
+kubectl get pods</code></pre>
+<p><code>envFrom.configMapRef</code> turns every key in the ConfigMap into an environment variable in the container.</p>
+<p>This file leaves out <code>imagePullPolicy: Never</code> on purpose. A tag other than <code>latest</code> defaults to <code>IfNotPresent</code>, so the image you loaded is used. A tag that doesn't exist then makes Kubernetes try Docker Hub and fail with <code>ImagePullBackOff</code>, which is the error Step 9 needs. With <code>Never</code> you would see <code>ErrImageNeverPull</code> instead.</p>
+<h3>Step 8 — Rolling update to a new image version</h3>
+<pre><code class="language-bash">sed -i &#x27;s/VERSION = &quot;v1&quot;/VERSION = &quot;v2&quot;/&#x27; app.py
+docker build -t myapp:v2 .
+minikube image load myapp:v2
+
+sed -i &#x27;s/image: myapp:v1/image: myapp:v2/&#x27; deployment.yaml
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp-deployment
+kubectl get pods
+kubectl rollout history deployment/myapp-deployment</code></pre>
+<p><em>Expected:</em> <code>rollout status</code> reports the old replicas being replaced and ends with <code>successfully rolled out</code>. The Pods have new names and young ages, and the history lists revisions 1 and 2.</p>
+<h3>Step 9 — Break it with a bad image tag</h3>
+<pre><code class="language-bash">sed -i &#x27;s/image: myapp:v2/image: myapp:v99/&#x27; deployment.yaml
+kubectl apply -f deployment.yaml
+kubectl rollout status deployment/myapp-deployment --timeout=30s
+kubectl get pods</code></pre>
+<p><em>Expected:</em> <code>rollout status</code> keeps waiting and then times out, which is the stall. <code>get pods</code> shows two old Pods still <code>Running</code> and one new Pod in <code>ErrImagePull</code> or <code>ImagePullBackOff</code>. The old Pods stay up because a rolling update won't remove them until a new Pod is ready.</p>
+<h3>Step 10 — Diagnose the failure</h3>
+<pre><code class="language-bash">BAD_POD=$(kubectl get pods --no-headers | awk &#x27;$3!=&quot;Running&quot;{print $1; exit}&#x27;)
+kubectl describe pod $BAD_POD</code></pre>
+<p><em>Expected:</em> the Events section shows <code>Failed to pull image "myapp:v99"</code>, <code>ErrImagePull</code>, <code>Back-off pulling image</code> and <code>ImagePullBackOff</code>. The cause is that tag <code>v99</code> doesn't exist.</p>
+<h3>Step 11 — Roll back to the previous working version</h3>
+<pre><code class="language-bash">kubectl rollout undo deployment/myapp-deployment
+kubectl rollout status deployment/myapp-deployment
+kubectl get pods
+kubectl get deployment myapp-deployment -o jsonpath=&#x27;{.spec.template.spec.containers[0].image}&#x27; &amp;&amp; echo</code></pre>
+<p><em>Expected:</em> <code>successfully rolled out</code>, all Pods <code>Running</code>, and the image prints as <code>myapp:v2</code>. To keep the file in step with the cluster: <code>sed -i 's/image: myapp:v99/image: myapp:v2/' deployment.yaml</code>.</p>
+<h3>Step 12 — Check the ConfigMap values inside a Pod</h3>
+<pre><code class="language-bash">POD=$(kubectl get pods -l app=myapp --no-headers | awk &#x27;$3==&quot;Running&quot;{print $1; exit}&#x27;)
+kubectl exec -it $POD -- /bin/bash</code></pre>
+<p>Inside the Pod:</p>
+<pre><code class="language-bash">printenv APP_MESSAGE APP_ENV
+exit</code></pre>
+<p><em>Expected:</em> <code>Hello from ConfigMap</code> and <code>lab</code>.</p>
+<h3>Step 13 — Read the logs and the event history</h3>
+<pre><code class="language-bash">kubectl logs $POD
+kubectl get events --sort-by=.metadata.creationTimestamp</code></pre>
+<p><em>Expected:</em> the logs show <code>Starting app v2 with message: Hello from ConfigMap</code> plus request lines. The events show the whole story: Scheduled, Pulled, Created and Started for good Pods, <code>Failed</code> and <code>BackOff</code> for the <code>v99</code> Pod, and <code>ScalingReplicaSet</code> lines for the update and the rollback. Kubernetes drops events after about an hour.</p>
+<h3>Cleanup</h3>
+<pre><code class="language-bash">kubectl delete -f deployment.yaml -f configmap.yaml
+minikube stop</code></pre>
+<h2>Exam-day gotchas and cleanup</h2>
+<p>Most lab failures come from leftovers of the previous lab or from not waiting long enough. Check this table before debugging anything else.</p>
+<div class="table-wrap"><table>
+<tr><td>Symptom</td><td>Fix</td></tr>
+<tr><td><code>permission denied ... /var/run/docker.sock</code></td><td>Run <code>newgrp docker</code>, log out and back in, or prefix the command with <code>sudo</code>.</td></tr>
+<tr><td><code>port is already allocated</code> (5000, 5001, 5432, 8080)</td><td><code>docker ps</code> to find the old container, then <code>docker rm -f &lt;name&gt;</code>.</td></tr>
+<tr><td><code>container name "/x" is already in use</code></td><td><code>docker rm -f x</code>, then run the command again.</td></tr>
+<tr><td><code>psql</code> connection refused, or <code>the database system is starting up</code></td><td>Wait 5 to 10 seconds and check <code>docker logs lab-postgres</code>.</td></tr>
+<tr><td><code>docker: 'compose' is not a docker command</code></td><td>Install the plugin: <code>sudo apt-get install -y docker-compose-v2</code>. The hyphenated <code>docker-compose</code> is the old v1 tool.</td></tr>
+<tr><td><code>minikube start</code> refuses to run as root</td><td>Run it as your normal user without <code>sudo</code>; that user must be in the <code>docker</code> group.</td></tr>
+<tr><td>kubectl says the connection to the server was refused</td><td>The cluster is stopped. Run <code>minikube start</code>.</td></tr>
+<tr><td>Pod status <code>ErrImageNeverPull</code></td><td>The image isn't inside Minikube. Run <code>minikube image load myapp:v1</code>.</td></tr>
+<tr><td>Pod status <code>ImagePullBackOff</code></td><td>The image tag doesn't exist. Fix the tag, or run <code>kubectl rollout undo deployment/&lt;name&gt;</code>.</td></tr>
+<tr><td><code>docker logs -f</code>, <code>docker compose logs -f</code> or <code>kubectl get pods -w</code> never returns</td><td>That is follow mode. Press Ctrl+C.</td></tr>
+<tr><td>NodePort address not reachable from the host</td><td>Run <code>minikube service &lt;service-name&gt; --url</code> and use the URL it prints.</td></tr>
+</tbody></table></div>
+<h3>Reset everything between labs</h3>
+<pre><code class="language-bash">docker ps -aq | xargs -r docker rm -f
+docker network prune -f
+docker volume prune -a -f
+minikube delete</code></pre>
+<p>This removes every container, every unused network and volume (database data included) and the whole Minikube cluster. Skip <code>minikube delete</code> if you haven't installed Minikube.</p>
+    <a class="back-top" href="#top">↑ Back to top</a>
+    <footer>
+      <p>BAI701 Lab Exam Study Guide — Docker &amp; Kubernetes</p>
+    </footer>
+  </main>
+</body>
+</html>
