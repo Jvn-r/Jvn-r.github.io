@@ -128,9 +128,6 @@ const commands = {
             printLink("linkedin:", "https://www.linkedin.com/in/jeevan-r-5026b4354/", "https://www.linkedin.com/in/jeevan-r-5026b4354/");
         },
     },
-    alarm: {
-        desc: "",
-    },
     about: {
         desc: "i talk about myself",
         run: (args) => {
